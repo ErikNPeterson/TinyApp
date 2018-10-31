@@ -15,8 +15,12 @@
    <a href='#'>Shorten a URL</a>
     <ul>
       <% for(const url in urls) { %>
-        <li><%= urls[url] %></li>
+        <form method="POST" action="/urls/<%= url %>/delete">
+          <li><%= url %> : <%= urls[url] %> </li>
+          <input type="submit" value="Delete">
+        </form>
     <% }; %>
     </ul>
  </body>
  </html>
+
