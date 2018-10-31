@@ -38,11 +38,25 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newShortURL}`);
 });
 
+
+
+
+
+
 // Oct 31st does this work ?
 app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
+
+// for modifying/updating the long URL
+app.post("/urls/:id/update", (req, res) => {
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect("/urls");
+});
+
+
+
 
 
 app.get("/u/:shortURL", (req, res) => {

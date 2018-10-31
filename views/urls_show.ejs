@@ -17,8 +17,10 @@ The long URL and its shortened form. -->
 <body>
   <a href='#'>Short URL</a>
    <ul>
-       <li><%= shortURL %> : <%= longURL %></li> <!-- this is calling the shortURL -->
-       <button type="button">Delete URL</button> 
+      <form method="POST" action="/urls/<%= shortURL %>/update">
+       <li><%= shortURL %> <input name="longURL" value="<%= longURL %>"/> </li> 
+        <input type="submit" value="Update URL">
+      </form> 
    </ul>
 </body>
 </html>
