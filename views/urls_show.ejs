@@ -1,0 +1,23 @@
+<!-- Fill out the urls_show.ejs template to display the following:
+The long URL and its shortened form. -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Tiny App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+  <script src="main.js"></script>
+</head>
+  <header>
+    <% include ./partials/_header.ejs %>
+  </header>
+<body>
+  <a href='#'>Short URL</a>
+   <ul>
+       <li><%= shortURL %> : <%= longURL %></li>  <!-- this is calling the shortURL -->
+   </ul>
+</body>
+</html>
