@@ -13,6 +13,19 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 const generateRandomString = () => {
     let text = "";
     const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -43,6 +56,41 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newShortURL}`);
 });
 
+//endpoint for REGISTRATION email & password
+app.post("/registration", (req, res) => {
+  if (!req.body.email || !req.body.password){
+    res.status(400).send('Youre a terrible person because you didnt enter both a email and password!');
+    //res.redirect("/registration"); ??? how do I get this to work!!!
+  } else {
+  let randomUserId = generateRandomString();
+  users[randomUserId] = {id:randomUserId, email:req.body.email, password:req.body.password};
+  res.cookie("username", randomUserId);
+  res.redirect("/urls");
+  }
+});
+// POST /register endpoint, and implement it such that it adds a new user 
+// object in the global users object which keeps track of the newly registered 
+// user's email, password and user ID.
+
+// To generate a random user ID, use the same function you used to generate random
+//  IDs for URLs.
+
+// ???? Set the cookie and redirect. ??????
+
+// After it appends the object to the users object, it should:
+
+// Set a user_id cookie containing the user's (newly generated) ID.
+// Redirect the user back to the /urls page.
+// Test that the users object is properly being appended to.
+
+// You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
+
+// Also test that the user_id cookie is being set correctly upon redirection.
+
+// You already did this sort of testing in the Cookies in Express activity. Use the same approach here.
+
+
+
 
 // Oct 31st does this work ?
 app.post("/urls/:id/delete", (req, res) => {
@@ -56,31 +104,17 @@ app.post("/urls/:id/update", (req, res) => {
   res.redirect("/urls");
 });
 
-//login 
+//login and create cookie
 app.post("/login", (req, res) => {
   res.cookie("username",req.body.username);
   res.redirect("/urls");
 });
 
-// logout
+// logout and delete cookie
 app.post("/logout", (req, res) => {
   res.clearCookie("username");
   res.redirect("/urls");
 });
-
-
-
-// <h4>You are logged in as: <%= username %></h4></form>
-//   <form method="POST" action="/logout">
-//       <!-- here we need to erase our cookie as our action -->
-//      <input type="submit" value="logout">
-//    </form> 
-  
-//   <!-- add a log out button with functionality -->
-
-
-
-
 
 
 
@@ -93,6 +127,12 @@ app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
   // are we rendering the urlDatabase this in the template vars object above ?
   res.render('urls_index', templateVars); 
+});
+
+// this will be the registration page
+app.get("/registration", (req, res) => {
+  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  res.render('urls_registration', templateVars); 
 });
 
 app.get("/", (req, res) => {
