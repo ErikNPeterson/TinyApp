@@ -27,6 +27,11 @@ const users = {
     id: "user2RandomID", 
     email: "user2@example.com", 
     password: "dishwasher-funk"
+  },
+  "user3RandomID": {
+    id: "user3RandomID", 
+    email: "test", 
+    password: "test"
   }
 }
 
@@ -63,13 +68,19 @@ app.post("/urls", (req, res) => {
 //endpoint for REGISTRATION email & password
 app.post("/registration", (req, res) => {
   if (!req.body.email || !req.body.password){
-    res.status(400).send("Please enter a valid user_id and password before submitting. Please just press just press back on your browser and resubmit.")
+    res.status(400).send("Please enter a valid user_id and password before submitting. Please just press just press back on your browser and resubmit.");
   } else {
-    let randomUserId = generateRandomString();
-    users[randomUserId] = {id:randomUserId, email:req.body.email, password:req.body.password};
-    res.cookie("user_id", randomUserId);
-    res.redirect("/urls");
+    for (let newUserId in users){
+      if (users[newUserId].email === req.body.email){
+          return res.status(403).send("This email is already registered. Please try use another email to register with.");
+        }
+      }
+      let user_id = generateRandomString();
+      users[user_id] = {id:user_id, email:req.body.email, password:req.body.password};
+      res.cookie("user_id", user_id);
+      res.redirect("/urls");        
   }
+
 });
 //If someone tries to register with an existing user's email, 
 //send back a response with the 400 status code.
@@ -90,10 +101,26 @@ app.post("/urls/:id/update", (req, res) => {
   res.redirect("/urls");
 });
 
-//login and create cookie
+
+
+
+// Nov 1: login and create cookie
 app.post("/login", (req, res) => {
-  res.cookie("user_id",req.body.user_id);
-  res.redirect("/urls");
+  if (!req.body.email || !req.body.password){ // is there an input ?
+    res.status(400).send("Please enter a valid user_id and password before submitting. Please just press just press back on your browser and resubmit.");
+  } 
+  //create a loop to match 
+  for (var userId in users){
+    if (users[userId].email === req.body.email){
+      if (users[userId].password === req.body.password){
+        res.cookie("user_id", userId);
+        res.redirect("/urls");
+      } else {
+        res.status(403).send("user password is incorrect");
+      }
+    }
+  }
+  res.status(403).send(`User '${req.body.email}' connot be found. Please check your email.`);
 });
 
 // logout and delete cookie
@@ -102,8 +129,6 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-
-
 app.get("/u/:shortURL", (req, res) => {
   // req.params takes the url input shortURL is the variable for the argument.
   res.redirect(urlDatabase[req.params.shortURL]); 
@@ -111,7 +136,10 @@ app.get("/u/:shortURL", (req, res) => {
 
 // Nov 1: updated user
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  let templateVars = { 
+    urls: urlDatabase, 
+    user: users[req.cookies["user_id"]]
+   };
   res.render('urls_index', templateVars); 
 });
 
@@ -121,11 +149,9 @@ app.get("/login", (req, res) => {
   res.render('urls_login.ejs', templateVars); 
 });
 
-
 // this will be the registration page
 app.get("/registration", (req, res) => {
   let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
-  // Nov 1: let templateVars = { urls: urlDatabase, user_id: req.cookies["user_id"] };
   res.render('urls_registration', templateVars); 
 });
 
@@ -141,19 +167,4 @@ app.get("/hello", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-});
-
-// Instead of passing in the cookie value into the templates (via templateVars), 
-// any endpoints rendering the _header.ejs partial should now pass in the entire user
-//  object (not just their ID) by looking it up in the users object first.
-
-// Change your templateVars (multiple endpoints) to pass in a user (object) property instead
-//  of the previously implemented username (string) property.
-
-
-
-
-// Upon receiving the POST request to "/urls" (and generating our shortURL), 
-// we can add the new pair of shortURL and longURL strings to our URL database
-
-// Add a new key-value pair to urlDatabase
+})
