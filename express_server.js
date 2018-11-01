@@ -3,9 +3,13 @@ var app = express();
 var PORT = 8080; // default port 8080
 var cookieParser = require('cookie-parser') // is this right?
 
+// var delay = require('express-delay');
 
 app.set("view engine", "ejs");
-app.use(cookieParser()) // is this right?
+
+app.use(cookieParser())
+
+
 
 
 var urlDatabase = {
@@ -46,8 +50,8 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id], username: req.cookies["username"]};
-  res.render("urls_show", templateVars);
+  let templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies["user_id"]]};
+  res.render("urls_show", templateVars); 
 });
 
 app.post("/urls", (req, res) => {
@@ -59,37 +63,19 @@ app.post("/urls", (req, res) => {
 //endpoint for REGISTRATION email & password
 app.post("/registration", (req, res) => {
   if (!req.body.email || !req.body.password){
-    res.status(400).send('Youre a terrible person because you didnt enter both a email and password!');
-    //res.redirect("/registration"); ??? how do I get this to work!!!
+    res.status(400).send("Please enter a valid user_id and password before submitting. Please just press just press back on your browser and resubmit.")
   } else {
-  let randomUserId = generateRandomString();
-  users[randomUserId] = {id:randomUserId, email:req.body.email, password:req.body.password};
-  res.cookie("username", randomUserId);
-  res.redirect("/urls");
+    let randomUserId = generateRandomString();
+    users[randomUserId] = {id:randomUserId, email:req.body.email, password:req.body.password};
+    res.cookie("user_id", randomUserId);
+    res.redirect("/urls");
   }
 });
-// POST /register endpoint, and implement it such that it adds a new user 
-// object in the global users object which keeps track of the newly registered 
-// user's email, password and user ID.
-
-// To generate a random user ID, use the same function you used to generate random
-//  IDs for URLs.
-
-// ???? Set the cookie and redirect. ??????
-
-// After it appends the object to the users object, it should:
-
-// Set a user_id cookie containing the user's (newly generated) ID.
-// Redirect the user back to the /urls page.
-// Test that the users object is properly being appended to.
-
-// You can insert a console.log or debugger prior to the redirect logic to inspect what data the object contains.
-
-// Also test that the user_id cookie is being set correctly upon redirection.
-
-// You already did this sort of testing in the Cookies in Express activity. Use the same approach here.
-
-
+//If someone tries to register with an existing user's email, 
+//send back a response with the 400 status code.
+//  require 
+// also check if the user name exists 
+// and if so return please enter your password.
 
 
 // Oct 31st does this work ?
@@ -106,13 +92,13 @@ app.post("/urls/:id/update", (req, res) => {
 
 //login and create cookie
 app.post("/login", (req, res) => {
-  res.cookie("username",req.body.username);
+  res.cookie("user_id",req.body.user_id);
   res.redirect("/urls");
 });
 
 // logout and delete cookie
 app.post("/logout", (req, res) => {
-  res.clearCookie("username");
+  res.clearCookie("user_id");
   res.redirect("/urls");
 });
 
@@ -123,15 +109,23 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[req.params.shortURL]); 
 });
 
+// Nov 1: updated user
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
-  // are we rendering the urlDatabase this in the template vars object above ?
+  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
   res.render('urls_index', templateVars); 
 });
 
+// Nov 1: login endpoint
+app.get("/login", (req, res) => {
+  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  res.render('urls_login.ejs', templateVars); 
+});
+
+
 // this will be the registration page
 app.get("/registration", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  let templateVars = { urls: urlDatabase, user: users[req.cookies["user_id"]] };
+  // Nov 1: let templateVars = { urls: urlDatabase, user_id: req.cookies["user_id"] };
   res.render('urls_registration', templateVars); 
 });
 
@@ -148,6 +142,16 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
+// Instead of passing in the cookie value into the templates (via templateVars), 
+// any endpoints rendering the _header.ejs partial should now pass in the entire user
+//  object (not just their ID) by looking it up in the users object first.
+
+// Change your templateVars (multiple endpoints) to pass in a user (object) property instead
+//  of the previously implemented username (string) property.
+
+
+
 
 // Upon receiving the POST request to "/urls" (and generating our shortURL), 
 // we can add the new pair of shortURL and longURL strings to our URL database

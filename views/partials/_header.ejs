@@ -1,19 +1,19 @@
 <header>This is My Header Title!</header>
 
-<% if (!username){ %>
-
-  <form method="POST" action="/login">
-    username login : <input name="username" value=""/> 
-     <input type="submit" value="sign in">
-   </form> 
+<% if (!user){ %>
+   <p>If you're already a user please <a href='/login'>login</a>.</p>
+  
+  <p>If not please <a href='/registration'>register</a>
+  </p>
 
 <% } else { %>
-  <h4>You are logged in as: <%= username %></h4>
+   
+  <h4>You are logged in as: <%= user.email %></h4>
   <form method="POST" action="/logout">
      <input type="submit" value="logout">
    </form> 
   
-   <% } %>
+<% } %>
 
 
 

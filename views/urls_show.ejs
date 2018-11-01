@@ -6,7 +6,7 @@ The long URL and its shortened form. -->
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Tiny App</title>
+  <title>Tiny App</title> 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
   <script src="main.js"></script>
@@ -15,7 +15,7 @@ The long URL and its shortened form. -->
       <% include ./partials/_header %>
   </header>
 <body>
-  <a href='#'>Short URL</a>
+    <a href='#'>Short URL</a>
    <ul>
       <form method="POST" action="/urls/<%= shortURL %>/update">
        <li><%= shortURL %> <input name="longURL" value="<%= longURL %>"/> </li> 
