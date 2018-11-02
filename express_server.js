@@ -11,24 +11,35 @@ app.use(cookieParser())
 
 
 var urlDatabase = {
-  // "b2xVn2": {
-  //   user_id: "g5c2f5",
-  //   url: "http://www.lighthouselabs.ca"
-  // }
-    
+  "b2xVn2": {
+    user_id: "userRandomID",
+    url: "http://www.lighthouselabs.ca"
+  },
+  "b2xVhk": {
+    user_id: "user2",
+    url: "http://www.lighthouselabs.ca"
+  },
+  "6hxVn2": {
+    user_id: "user1",
+    url: "http://www.lighthouselabs.ca"
+  },
+  "bfkVn2": {
+    user_id: "test",
+    url: "http://www.lighthouselabs.ca"
+  }
 
 };
 
 const users = { 
   "userRandomID": {
     id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    email: "user1", 
+    password: "test"
   },
  "user2RandomID": {
     id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
+    email: "user2", 
+    password: "test"
   },
   "user3RandomID": {
     id: "user3RandomID", 
@@ -66,17 +77,21 @@ app.get("/urls/new", (req, res) => {
   }
 
 });
-
+// use urlsForUser() function to determine whether they can see the urls 
 app.get("/urls/:id", (req, res) => {
-  console.log('DATABASE', urlDatabase);
-  console.log('req.params.id', req.params.id);
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id].url,
     user: users[req.cookies["user_id"]]
   };
+  if (urlDatabase[req.params.id].user_id === req.cookies.user_id){
+      templateVars.longURL = urlDatabase[req.params.id].url;
+  } else {
+      templateVars.longURL = "Sorry but this URL does not belong to you.";
+  }
+  
   res.render("urls_show", templateVars); 
 });
+
 
 // Nov 1: creating a new shortURL
 app.post("/urls", (req, res) => {
@@ -105,14 +120,6 @@ app.post("/registration", (req, res) => {
 
 });
 
-
-// We suggest creating a function named urlsForUser(id) which returns the subset of the URL
-//  database that belongs to the user with ID id, so that your endpoint code remains clean.
-
-// Similarly, this also means that the /urls/:id page should display a message or
-//  prompt if the user is not logged in, or if the the URL with the matching :id 
-// does not belong to them.
-
 // Oct 31st // for deleting the URL
 app.post("/urls/:id/delete", (req, res) => {
   let user_id = req.cookies["user_id"]
@@ -139,7 +146,6 @@ app.post("/urls/:id/update", (req, res) => {
   }
 });
 
-
 // Nov 1: login and create cookie
 app.post("/login", (req, res) => {
   if (!req.body.email || !req.body.password){ // is there an input ?
@@ -165,33 +171,32 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/u/:shortURL", (req, res) => {
-  // req.params takes the url input shortURL is the variable for the argument.
-  res.redirect(urlDatabase[req.params.shortURL]); 
-});
-
-
+                app.get("/u/:shortURL", (req, res) => {
+                  // req.params takes the url input shortURL is the variable for the argument.
+                  res.redirect(urlDatabase[req.params.shortURL].url); 
+                });
 
 function urlsForUser(user_id) { 
   let newObject = {};
   for(let property in urlDatabase){ 
     if (urlDatabase[property].user_id === user_id){
       newObject[property] = urlDatabase[property];
+    } 
   }
-}
 return newObject;
 
 }
-// Nov 2, Nov 1: updated user
-app.get("/urls", (req, res) => {
-  // use OUR FUNCTION HERE replace url database with the function.
-  let templateVars = { 
-    urls: urlsForUser(req.cookies.user_id), 
-    user: users[req.cookies["user_id"]]
-   };
-  res.render('urls_index', templateVars); 
 
-});
+                  // Nov 2, Nov 1: updated user
+                  app.get("/urls", (req, res) => {
+                    // use OUR FUNCTION HERE replace url database with the function.
+                    let templateVars = { 
+                      urls: urlsForUser(req.cookies.user_id), 
+                      user: users[req.cookies["user_id"]]
+                    };
+                    res.render('urls_index', templateVars); 
+                    
+                  });
 
 
 

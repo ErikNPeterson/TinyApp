@@ -15,12 +15,24 @@ The long URL and its shortened form. -->
       <% include ./partials/_header %>
   </header>
 <body>
-    <a href='#'>Short URL</a>
+   <h2>Your shortened URL</h2>
+
+  <% if(user){ %>
    <ul>
       <form method="POST" action="/urls/<%= shortURL %>/update">
-       <li><%= shortURL %> <input name="longURL" value="<%= longURL %>"/> </li> 
+       <li> <a href="/u/<%= shortURL %>"><%= shortURL %></a>  <input name="longURL" value="<%= longURL %>"/> </li> 
         <input type="submit" value="Update URL">
       </form> 
    </ul>
+   <% } else { %>
+    <h4>Please login or register you wish to see our shortURL's</h4>
+    <% }; %>
+
+    <h5><a href='/urls'>Click here to see all short URL's</a></h5>
 </body>
 </html>
+
+<!-- make and else if if they are logged in but can't view 
+  this particular URL because it does not belong to them. -->
+ 
+

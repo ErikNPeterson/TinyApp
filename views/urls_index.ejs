@@ -13,6 +13,8 @@
       <% include ./partials/_header.ejs %>
    </header>
    <a href='/urls/new'>Click here to shorten a URL.</a>
+
+   <% if(user){ %>
     <ul>
       <% for(const url in urls) { %>
         <form method="POST" action="/urls/<%= url %>/delete">
@@ -22,5 +24,9 @@
         </form>
     <% }; %>
     </ul>
+  <% } else { %>
+    <h3>Please login or register to see URL's</h3>
+  <% }; %>
+
  </body>
  </html>
