@@ -12,11 +12,11 @@
    <header>
       <% include ./partials/_header.ejs %>
    </header>
-   <a href='#'>Shorten a URL</a>
+   <a href='/urls/new'>Click here to shorten a URL.</a>
     <ul>
       <% for(const url in urls) { %>
         <form method="POST" action="/urls/<%= url %>/delete">
-          <li><%= url %> : <%= urls[url] %> </li>
+          <li><%= url %> : <%= urls[url].url %> </li>
           <a href="/urls/<%= url %>">Edit</a>
           <input type="submit" value="Delete">
         </form>

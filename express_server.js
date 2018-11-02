@@ -3,8 +3,6 @@ var app = express();
 var PORT = 8080; // default port 8080
 var cookieParser = require('cookie-parser') // is this right?
 
-// var delay = require('express-delay');
-
 app.set("view engine", "ejs");
 
 app.use(cookieParser())
@@ -13,8 +11,12 @@ app.use(cookieParser())
 
 
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  // "b2xVn2": {
+  //   user_id: "g5c2f5",
+  //   url: "http://www.lighthouselabs.ca"
+  // }
+    
+
 };
 
 const users = { 
@@ -50,18 +52,38 @@ const generateRandomString = () => {
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+
+
+
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new", templateVars);
+  // what do I need for templateVars here ???
+  let templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies["user_id"]]};
+  let user_id = req.cookies["user_id"];
+  if (user_id){ 
+    res.render("urls_new", templateVars);
+  } else {
+    res.send('<form action="/urls"><input type="submit" value="Please login to use this feature." /></form>');
+  }
+
 });
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id], user: users[req.cookies["user_id"]]};
+  console.log('DATABASE', urlDatabase);
+  console.log('req.params.id', req.params.id);
+  let templateVars = {
+    shortURL: req.params.id,
+    longURL: urlDatabase[req.params.id].url,
+    user: users[req.cookies["user_id"]]
+  };
   res.render("urls_show", templateVars); 
 });
 
+// Nov 1: creating a new shortURL
 app.post("/urls", (req, res) => {
+  let user_id = req.cookies["user_id"];
   let newShortURL = generateRandomString();
-  urlDatabase[newShortURL] = req.body.longURL;
+  urlDatabase[newShortURL] = {url: req.body.longURL, user_id: user_id } ;
+  console.log(urlDatabase);
   res.redirect(`/urls/${newShortURL}`);
 });
 
@@ -82,26 +104,40 @@ app.post("/registration", (req, res) => {
   }
 
 });
-//If someone tries to register with an existing user's email, 
-//send back a response with the 400 status code.
-//  require 
-// also check if the user name exists 
-// and if so return please enter your password.
 
 
-// Oct 31st does this work ?
+// We suggest creating a function named urlsForUser(id) which returns the subset of the URL
+//  database that belongs to the user with ID id, so that your endpoint code remains clean.
+
+// Similarly, this also means that the /urls/:id page should display a message or
+//  prompt if the user is not logged in, or if the the URL with the matching :id 
+// does not belong to them.
+
+// Oct 31st // for deleting the URL
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect("/urls");
+  let user_id = req.cookies["user_id"]
+  // if cookie user = urldatabse user 
+ if (user_id === urlDatabase[req.params.id].user_id){  // what should Id be
+   urlDatabase[req.params.id].url = req.body.longURL;
+   delete urlDatabase[req.params.id];
+   res.redirect("/urls");
+ } else {
+   res.send('<form action="/urls"><input type="submit" value="Sorry but you are unable to DELETE or EDIT this URL. Click here to go back." /></form>');
+ }
+  
 });
 
-// for modifying/updating the long URL
+//Nov 1: for modifying/updating the long URL
 app.post("/urls/:id/update", (req, res) => {
-  urlDatabase[req.params.id] = req.body.longURL;
-  res.redirect("/urls");
+  let user_id = req.cookies["user_id"]
+   // if cookie user = urldatabse user 
+  if (user_id === urlDatabase[req.params.id].user_id){  // what should Id be
+    urlDatabase[req.params.id].url = req.body.longURL;
+    res.redirect("/urls");
+  } else {
+    res.send('<form action="/urls"><input type="submit" value="Sorry but you are unable to EDIT or DELETE this URL. Click here to go back." /></form>');
+  }
 });
-
-
 
 
 // Nov 1: login and create cookie
@@ -134,14 +170,39 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[req.params.shortURL]); 
 });
 
-// Nov 1: updated user
+
+
+function urlsForUser(user_id) { 
+  let newObject = {};
+  for(let property in urlDatabase){ 
+    if (urlDatabase[property].user_id === user_id){
+      newObject[property] = urlDatabase[property];
+  }
+}
+return newObject;
+
+}
+// Nov 2, Nov 1: updated user
 app.get("/urls", (req, res) => {
+  // use OUR FUNCTION HERE replace url database with the function.
   let templateVars = { 
-    urls: urlDatabase, 
+    urls: urlsForUser(req.cookies.user_id), 
     user: users[req.cookies["user_id"]]
    };
   res.render('urls_index', templateVars); 
+
 });
+
+
+
+
+
+
+
+
+
+
+
 
 // Nov 1: login endpoint
 app.get("/login", (req, res) => {
