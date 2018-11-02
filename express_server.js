@@ -3,6 +3,11 @@ var app = express();
 var PORT = 8080; // default port 8080
 var cookieParser = require('cookie-parser') // is this right?
 
+// password stuff 3_lines
+const bcrypt = require('bcrypt');
+const password = "purple-monkey-dinosaur"; // you will probably this from req.params
+const hashedPassword = bcrypt.hashSync(password, 10);
+
 app.set("view engine", "ejs");
 
 app.use(cookieParser())
@@ -113,12 +118,13 @@ app.post("/registration", (req, res) => {
         }
       }
       let user_id = generateRandomString();
-      users[user_id] = {id:user_id, email:req.body.email, password:req.body.password};
+      users[user_id] = {id:user_id, email:req.body.email, password: bcrypt.hashSync(req.body.password, 10)};
       res.cookie("user_id", user_id);
       res.redirect("/urls");        
   }
-
+  // console.log(users); testing for encryption of password.
 });
+
 
 // Oct 31st // for deleting the URL
 app.post("/urls/:id/delete", (req, res) => {
@@ -154,7 +160,8 @@ app.post("/login", (req, res) => {
   //create a loop to match 
   for (var userId in users){
     if (users[userId].email === req.body.email){
-      if (users[userId].password === req.body.password){
+      //;users[userId].password === req.body.password)
+      if (bcrypt.compareSync(req.body.password, users[userId].password )){ 
         res.cookie("user_id", userId);
         res.redirect("/urls");
       } else {
@@ -171,10 +178,10 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
-                app.get("/u/:shortURL", (req, res) => {
-                  // req.params takes the url input shortURL is the variable for the argument.
-                  res.redirect(urlDatabase[req.params.shortURL].url); 
-                });
+app.get("/u/:shortURL", (req, res) => {
+  // req.params takes the url input shortURL is the variable for the argument.
+  res.redirect(urlDatabase[req.params.shortURL].url); 
+});
 
 function urlsForUser(user_id) { 
   let newObject = {};
@@ -187,16 +194,16 @@ return newObject;
 
 }
 
-                  // Nov 2, Nov 1: updated user
-                  app.get("/urls", (req, res) => {
-                    // use OUR FUNCTION HERE replace url database with the function.
-                    let templateVars = { 
-                      urls: urlsForUser(req.cookies.user_id), 
-                      user: users[req.cookies["user_id"]]
-                    };
-                    res.render('urls_index', templateVars); 
-                    
-                  });
+// Nov 2, Nov 1: updated user
+app.get("/urls", (req, res) => {
+  // use OUR FUNCTION HERE replace url database with the function.
+  let templateVars = { 
+    urls: urlsForUser(req.cookies.user_id), 
+    user: users[req.cookies["user_id"]]
+  };
+  res.render('urls_index', templateVars); 
+  
+});
 
 
 
