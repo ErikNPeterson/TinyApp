@@ -1,32 +1,41 @@
- <!DOCTYPE html>
- <html lang="en">
- <head>
-   <meta charset="utf-8" />
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <title>Tiny App</title>
-   <meta name="viewport" content="width=device-width, initial-scale=1">
-   <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
-   <script src="main.js"></script>
- </head>
- <body>
-   <header>
-      <% include ./partials/_header.ejs %>
-   </header>
-   <a href='/urls/new'>Click here to shorten a URL.</a>
+<!DOCTYPE html>
+<html lang="en">
 
-   <% if(user){ %>
-    <ul>
-      <% for(const url in urls) { %>
-        <form method="POST" action="/urls/<%= url %>/delete">
-          <li><%= url %> : <%= urls[url].url %> </li>
-          <a href="/urls/<%= url %>">Edit</a>
-          <input type="submit" value="Delete">
-        </form>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Tiny App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+  <script src="main.js"></script>
+</head>
+
+<body>
+  <header>
+    <% include ./partials/_header.ejs %>
+  </header>
+
+
+  <% if(user){ %>
+
+  <h3>Urls List</h3>
+  <ul>
+    <% for(const url in urls) { %>
+    <form method="POST" action="/urls/<%= url %>/delete">
+      <li>
+        <a href="/u/<%= url %>">
+          <%= url %></a>:
+        <%= urls[url].url %>
+      </li>
+      <a href="/urls/<%= url %>">Edit</a>
+      <input type="submit" value="Delete">
+    </form>
     <% }; %>
-    </ul>
+  </ul>
   <% } else { %>
-    <h3>Please login or register to see URL's</h3>
+  <h3>Please login or register to see URL's</h3>
   <% }; %>
+  <a href='/urls/new'>Click here to shorten another URL.</a>
+</body>
 
- </body>
- </html>
+</html>
