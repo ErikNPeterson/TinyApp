@@ -102,7 +102,7 @@ app.get("/urls/new", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id],
-    user: users[req.session["user_id"]]
+    user: users[req.session.user_id]
   };
   let user_id = req.session["user_id"];
   if (user_id) {
@@ -116,16 +116,13 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    user: users[req.session.id]
+    user: users[req.session.user_id]
   };
-  console.log("url Database: ", urlDatabase);
-  console.log("req.session: ", users[req.session.id]);
   if (urlDatabase[req.params.id].user_id === req.session.user_id) {
     templateVars.longURL = urlDatabase[req.params.id].url;
   } else {
     templateVars.longURL = "Sorry but this URL does not belong to you.";
   }
-  console.log(templateVars);
   res.render("urls_show", templateVars);
 });
 
@@ -137,7 +134,6 @@ app.post("/urls", (req, res) => {
     url: req.body.longURL,
     user_id: user_id
   };
-  console.log(urlDatabase);
   res.redirect(`/urls/${newShortURL}`);
 });
 
@@ -157,7 +153,7 @@ app.post("/registration", (req, res) => {
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 10)
     };
-    req.session.user_id = users[user_id].email;
+    req.session.user_id = user_id;
     res.redirect("/urls");
   }
   // console.log(users); testing for encryption of password.
@@ -199,7 +195,7 @@ app.post("/login", (req, res) => {
     if (users[userId].email === req.body.email) {
       //;users[userId].password === req.body.password)
       if (bcrypt.compareSync(req.body.password, users[userId].password)) {
-        req.session.user_id = users[userId].email;
+        req.session.user_id = userId;
         res.redirect("/urls");
       } else {
         res.status(403).send("user password is incorrect");
@@ -226,7 +222,7 @@ app.get("/urls", (req, res) => {
   if (req.session.user_id) {
     let templateVars = {
       urls: urlsForUser(req.session.user_id),
-      user: req.session.user_id
+      user: users[req.session.user_id]
     };
     res.render('urls_index', templateVars);
   } else {
@@ -244,7 +240,7 @@ app.get("/urls", (req, res) => {
 app.get("/login", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    user: req.session.user_id
+    user: users[req.session.user_id]
   };
   res.render('urls_login.ejs', templateVars);
 });
