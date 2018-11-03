@@ -84,6 +84,9 @@ function urlsForUser(user_id) {
 
 }
 
+const currentUser = session => {
+  return users[session.user_id];
+}
 // function findUserByEmail(email) {
 //   let newObject = 
 //   for (let property in urlDatabase) {
@@ -102,7 +105,7 @@ app.get("/urls/new", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
     longURL: urlDatabase[req.params.id],
-    user: users[req.session.user_id]
+    user: currentUser(req.session)
   };
   let user_id = req.session["user_id"];
   if (user_id) {
@@ -116,7 +119,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    user: users[req.session.user_id]
+    user: currentUser(req.session)
   };
   if (urlDatabase[req.params.id].user_id === req.session.user_id) {
     templateVars.longURL = urlDatabase[req.params.id].url;
@@ -222,7 +225,7 @@ app.get("/urls", (req, res) => {
   if (req.session.user_id) {
     let templateVars = {
       urls: urlsForUser(req.session.user_id),
-      user: users[req.session.user_id]
+      user: currentUser(req.session)
     };
     res.render('urls_index', templateVars);
   } else {
@@ -240,7 +243,7 @@ app.get("/urls", (req, res) => {
 app.get("/login", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
-    user: users[req.session.user_id]
+    user: currentUser(req.session)
   };
   res.render('urls_login.ejs', templateVars);
 });
